@@ -1,0 +1,46 @@
+name: Post Yukleyici
+
+on:
+  schedule:
+    - cron: "0 9 * * *"   # 12:00 Turkiye (UTC+3)
+    - cron: "0 15 * * *"  # 18:00 Turkiye (UTC+3)
+  workflow_dispatch:       # Elle tetikleme butonu
+
+permissions:
+  contents: write
+
+jobs:
+  yukle:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repo indir
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Kutuphaneleri yukle
+        run: pip install -r requirements.txt
+
+      - name: Google credentials olustur
+        run: |
+          echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
+          echo '${{ secrets.GOOGLE_TOKEN }}' > token.json
+
+      - name: Scripti calistir
+        env:
+          PAGE_TOKEN:    ${{ secrets.PAGE_TOKEN }}
+          INSTAGRAM_ID:  ${{ secrets.INSTAGRAM_ID }}
+          PAGE_ID:       ${{ secrets.PAGE_ID }}
+        run: python post_yukleyici.py --once
+
+      - name: Excel degistiyse commit et
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "post takip.xlsx"
+          git diff --cached --quiet || git commit -m "Excel guncellendi"
+          git push
