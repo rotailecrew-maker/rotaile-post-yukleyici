@@ -210,6 +210,10 @@ def process_posts():
         print(f"Drive baglanti hatasi: {e}")
         return
 
+    force_run = os.environ.get("FORCE_RUN", "false").lower() == "true"
+    if force_run:
+        print("Manuel tetikleme: zaman kontrolu atlanıyor, bugunun bekleyen postu yuklenecek.")
+
     wb = openpyxl.load_workbook(EXCEL_FILE)
     ws = wb.active
     changed = False
@@ -229,8 +233,12 @@ def process_posts():
 
         if not video_name or durum.startswith("Yuklendi"):
             continue
-        if tarih != today or saat != current_time:
-            continue
+        if force_run:
+            if tarih != today:
+                continue
+        else:
+            if tarih != today or saat != current_time:
+                continue
 
         print(f"\nIslenecek: {video_name}  ({current_week})")
 

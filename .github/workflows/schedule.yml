@@ -35,6 +35,7 @@ jobs:
           PAGE_TOKEN:    ${{ secrets.PAGE_TOKEN }}
           INSTAGRAM_ID:  ${{ secrets.INSTAGRAM_ID }}
           PAGE_ID:       ${{ secrets.PAGE_ID }}
+          FORCE_RUN:     ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
         run: python post_yukleyici.py --once
 
       - name: Excel degistiyse commit et
